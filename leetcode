@@ -1,0 +1,332 @@
+/**
+ * ЗАДАНИЕ 3: РЕШЕНИЕ ЗАДАЧ С LEETCODE
+ * Все функции протестированы с примерами и выводят результаты в консоль
+ */
+
+console.log('='.repeat(60))
+console.log('LEETCODE ЗАДАЧИ - ТЕСТИРОВАНИЕ РЕШЕНИЙ')
+console.log('='.repeat(60))
+
+/**
+ * Задача 14: Longest Common Prefix (Самый длинный общий префикс)
+ * Сложность: O(S), где S - сумма всех символов во всех строках
+ *
+ * @param {string[]} stringsArray - Массив строк для поиска общего префикса
+ * @returns {string} - Найденный общий префикс или пустая строка
+ */
+function findLongestCommonPrefix(stringsArray) {
+  // Проверка на пустой массив или отсутствие строк
+  if (!stringsArray || stringsArray.length === 0) {
+    return ''
+  }
+
+  // Берем первую строку как основу для сравнения
+  let commonPrefix = stringsArray[0]
+
+  // Проходим по всем строкам массива, начиная со второй
+  for (let i = 1; i < stringsArray.length; i++) {
+    const currentString = stringsArray[i]
+
+    // Пока текущая строка не начинается с текущего префикса
+    while (currentString.indexOf(commonPrefix) !== 0) {
+      // Укорачиваем префикс на один символ с конца
+      commonPrefix = commonPrefix.substring(0, commonPrefix.length - 1)
+
+      // Если префикс стал пустым, значит общего префикса нет
+      if (commonPrefix === '') {
+        return ''
+      }
+    }
+  }
+
+  return commonPrefix
+}
+
+// Тестирование задачи 14
+console.log('\n🔹 ЗАДАЧА 14: Longest Common Prefix')
+console.log('─'.repeat(40))
+
+const testCases14 = [
+  { input: ['flower', 'flow', 'flight'], expected: 'fl' },
+  { input: ['dog', 'racecar', 'car'], expected: '' },
+  { input: ['programming', 'programmer', 'program'], expected: 'prog' },
+  { input: ['apple', 'ape', 'april'], expected: 'ap' },
+  { input: [], expected: '' },
+  { input: [''], expected: '' },
+  { input: ['single'], expected: 'single' },
+]
+
+testCases14.forEach((testCase, index) => {
+  const result = findLongestCommonPrefix(testCase.input)
+  const status = result === testCase.expected ? ' ПРОЙДЕН' : ' ОШИБКА'
+  console.log(`Тест ${index + 1}: ${status}`)
+  console.log(
+    `   Ввод: [${testCase.input.map((str) => `"${str}"`).join(', ')}]`
+  )
+  console.log(`   Ожидалось: "${testCase.expected}"`)
+  console.log(`   Получено: "${result}"`)
+  console.log('   ---')
+})
+
+/**
+ * Задача 35: Search Insert Position (Поиск позиции вставки)
+ * Сложность: O(log n) - бинарный поиск
+ *
+ * @param {number[]} sortedNumbers - Отсортированный массив чисел
+ * @param {number} targetValue - Целевое число для поиска
+ * @returns {number} - Индекс элемента или позиция для вставки
+ */
+function findInsertPosition(sortedNumbers, targetValue) {
+  // Инициализация границ поиска
+  let leftBoundary = 0
+  let rightBoundary = sortedNumbers.length - 1
+
+  // Бинарный поиск
+  while (leftBoundary <= rightBoundary) {
+    // Вычисление среднего индекса
+    const middleIndex = Math.floor((leftBoundary + rightBoundary) / 2)
+    const middleValue = sortedNumbers[middleIndex]
+
+    // Если нашли точное совпадение
+    if (middleValue === targetValue) {
+      return middleIndex
+    }
+    // Если средний элемент меньше целевого - ищем в правой половине
+    else if (middleValue < targetValue) {
+      leftBoundary = middleIndex + 1
+    }
+    // Если средний элемент больше целевого - ищем в левой половине
+    else {
+      rightBoundary = middleIndex - 1
+    }
+  }
+
+  // Если элемент не найден, leftBoundary указывает на позицию вставки
+  return leftBoundary
+}
+
+// Тестирование задачи 35
+console.log('\n ЗАДАЧА 35: Search Insert Position')
+console.log('─'.repeat(40))
+
+const testCases35 = [
+  { array: [1, 3, 5, 6], target: 5, expected: 2 },
+  { array: [1, 3, 5, 6], target: 2, expected: 1 },
+  { array: [1, 3, 5, 6], target: 7, expected: 4 },
+  { array: [1, 3, 5, 6], target: 0, expected: 0 },
+  { array: [1], target: 0, expected: 0 },
+  { array: [1, 3, 5], target: 4, expected: 2 },
+  { array: [], target: 5, expected: 0 },
+]
+
+testCases35.forEach((testCase, index) => {
+  const result = findInsertPosition(testCase.array, testCase.target)
+  const status = result === testCase.expected ? ' ПРОЙДЕН' : ' ОШИБКА'
+  console.log(`Тест ${index + 1}: ${status}`)
+  console.log(`   Массив: [${testCase.array.join(', ')}]`)
+  console.log(`   Целевое число: ${testCase.target}`)
+  console.log(`   Ожидаемая позиция: ${testCase.expected}`)
+  console.log(`   Полученная позиция: ${result}`)
+  console.log('   ---')
+})
+
+/**
+ * Задача 49: Group Anagrams (Группировка анаграмм)
+ * Сложность: O(n * k log k), где n - количество строк, k - максимальная длина строки
+ *
+ * @param {string[]} stringsArray - Массив строк для группировки
+ * @returns {string[][]} - Массив сгруппированных анаграмм
+ */
+function groupAnagrams(stringsArray) {
+  // Создаем Map для хранения групп анаграмм
+  // Ключ - отсортированная строка, значение - массив исходных строк
+  const anagramsMap = new Map()
+
+  // Проходим по всем строкам входного массива
+  for (const originalString of stringsArray) {
+    // Сортируем символы строки для создания ключа
+    // Все анаграммы после сортировки будут иметь одинаковый ключ
+    const sortedString = originalString.split('').sort().join('')
+
+    // Если ключ уже существует в Map, добавляем строку в существующий массив
+    if (anagramsMap.has(sortedString)) {
+      anagramsMap.get(sortedString).push(originalString)
+    }
+    // Если ключа нет, создаем новую запись с массивом из одной строки
+    else {
+      anagramsMap.set(sortedString, [originalString])
+    }
+  }
+
+  // Преобразуем Map в массив массивов (берем только значения)
+  return Array.from(anagramsMap.values())
+}
+
+// Тестирование задачи 49
+console.log('\n ЗАДАЧА 49: Group Anagrams')
+console.log('─'.repeat(40))
+
+const testCases49 = [
+  {
+    input: ['eat', 'tea', 'tan', 'ate', 'nat', 'bat'],
+    expected: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']],
+  },
+  {
+    input: [''],
+    expected: [['']],
+  },
+  {
+    input: ['a'],
+    expected: [['a']],
+  },
+  {
+    input: ['abc', 'bca', 'cab', 'def', 'fed'],
+    expected: [
+      ['abc', 'bca', 'cab'],
+      ['def', 'fed'],
+    ],
+  },
+]
+
+testCases49.forEach((testCase, index) => {
+  const result = groupAnagrams(testCase.input)
+
+  // Сортируем внутренние массивы для сравнения
+  const sortedResult = result.map((group) => group.sort()).sort()
+  const sortedExpected = testCase.expected.map((group) => group.sort()).sort()
+
+  // Сравниваем JSON строки для глубокого сравнения массивов
+  const isPassed =
+    JSON.stringify(sortedResult) === JSON.stringify(sortedExpected)
+  const status = isPassed ? ' ПРОЙДЕН' : ' ОШИБКА'
+
+  console.log(`Тест ${index + 1}: ${status}`)
+  console.log(
+    `   Ввод: [${testCase.input.map((str) => `"${str}"`).join(', ')}]`
+  )
+  console.log(`   Ожидалось: ${JSON.stringify(testCase.expected)}`)
+  console.log(`   Получено: ${JSON.stringify(result)}`)
+  console.log('   ---')
+})
+
+/**
+ * Задача 54: Spiral Matrix (Обход матрицы по спирали)
+ * Сложность: O(m * n), где m - количество строк, n - количество столбцов
+ *
+ * @param {number[][]} matrix - Двумерный массив (матрица)
+ * @returns {number[]} - Элементы матрицы в порядке спирального обхода
+ */
+function traverseMatrixSpiral(matrix) {
+  // Проверка на пустую матрицу
+  if (!matrix || matrix.length === 0 || matrix[0].length === 0) {
+    return []
+  }
+
+  // Массив для хранения результата обхода
+  const result = []
+
+  // Инициализация границ обхода
+  let topBoundary = 0
+  let bottomBoundary = matrix.length - 1
+  let leftBoundary = 0
+  let rightBoundary = matrix[0].length - 1
+
+  // Пока есть элементы для обхода внутри границ
+  while (topBoundary <= bottomBoundary && leftBoundary <= rightBoundary) {
+    // Движение слева направо по верхней строке
+    for (let col = leftBoundary; col <= rightBoundary; col++) {
+      result.push(matrix[topBoundary][col])
+    }
+    topBoundary++ // Сдвигаем верхнюю границу вниз
+
+    // Движение сверху вниз по правому столбцу
+    for (let row = topBoundary; row <= bottomBoundary; row++) {
+      result.push(matrix[row][rightBoundary])
+    }
+    rightBoundary-- // Сдвигаем правую границу влево
+
+    // Проверяем, остались ли строки для обхода (для случая, когда матрица не квадратная)
+    if (topBoundary <= bottomBoundary) {
+      // Движение справа налево по нижней строке
+      for (let col = rightBoundary; col >= leftBoundary; col--) {
+        result.push(matrix[bottomBoundary][col])
+      }
+      bottomBoundary-- // Сдвигаем нижнюю границу вверх
+    }
+
+    // Проверяем, остались ли столбцы для обхода
+    if (leftBoundary <= rightBoundary) {
+      // Движение снизу вверх по левому столбцу
+      for (let row = bottomBoundary; row >= topBoundary; row--) {
+        result.push(matrix[row][leftBoundary])
+      }
+      leftBoundary++ // Сдвигаем левую границу вправо
+    }
+  }
+
+  return result
+}
+
+// Тестирование задачи 54
+console.log('\n ЗАДАЧА 54: Spiral Matrix')
+console.log('─'.repeat(40))
+
+const testCases54 = [
+  {
+    matrix: [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9],
+    ],
+    expected: [1, 2, 3, 6, 9, 8, 7, 4, 5],
+  },
+  {
+    matrix: [
+      [1, 2, 3, 4],
+      [5, 6, 7, 8],
+      [9, 10, 11, 12],
+    ],
+    expected: [1, 2, 3, 4, 8, 12, 11, 10, 9, 5, 6, 7],
+  },
+  {
+    matrix: [
+      [1, 2],
+      [3, 4],
+      [5, 6],
+    ],
+    expected: [1, 2, 4, 6, 5, 3],
+  },
+  {
+    matrix: [[1]],
+    expected: [1],
+  },
+  {
+    matrix: [],
+    expected: [],
+  },
+]
+
+testCases54.forEach((testCase, index) => {
+  const result = traverseMatrixSpiral(testCase.matrix)
+  const isPassed = JSON.stringify(result) === JSON.stringify(testCase.expected)
+  const status = isPassed ? ' ПРОЙДЕН' : ' ОШИБКА'
+
+  console.log(`Тест ${index + 1}: ${status}`)
+  console.log(`   Матрица:`)
+  testCase.matrix.forEach((row) => console.log(`     [${row.join(', ')}]`))
+  console.log(`   Ожидаемый обход: [${testCase.expected.join(', ')}]`)
+  console.log(`   Полученный обход: [${result.join(', ')}]`)
+  console.log('   ---')
+})
+
+// Сводка по сложности алгоритмов
+console.log('\n СВОДКА ПО СЛОЖНОСТИ АЛГОРИТМОВ')
+console.log('─'.repeat(40))
+console.log('Задача 14: O(S) - где S сумма всех символов во всех строках')
+console.log('Задача 35: O(log n) - бинарный поиск')
+console.log('Задача 49: O(n * k log k) - n строк, k - макс. длина строки')
+console.log('Задача 54: O(m * n) - m строк, n столбцов')
+
+console.log('\n' + '='.repeat(60))
+console.log('ТЕСТИРОВАНИЕ ЗАВЕРШЕНО')
+console.log('='.repeat(60))
